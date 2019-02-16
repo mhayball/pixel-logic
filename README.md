@@ -1,1 +1,2 @@
-# pixel-logic solver
+# pixel-logic 
+# solver for the pixel logic game
