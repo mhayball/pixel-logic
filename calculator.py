@@ -1,5 +1,5 @@
 import numpy as np
-
+import plot
 
 class Strip:
     def __init__(self, RC, ID, inputArray, length):
@@ -74,7 +74,7 @@ def setup(rows, columns):  # setup initial strips
     return strips
 
 
-def firstPass(strips):  # first check of strips following setup
+def firstPass():  # first check of strips following setup
     for i in strips:
 
         checkStrip(strips[i])
@@ -192,8 +192,8 @@ def mark(strip, location, type):  # marks a unit in a strip at location, with ty
         # print "marked - location:", location, "type:", type
         strip.outputArray[location] = type  # mark the unit
 
-        if strip.RC == 'R':
-            addFrameToPlotFigure(rows, columns, strips, figure)
+        if strip.RC == 'R' and showPlot == 1:
+            plot.addFrameToPlotFigure(rows, columns, strips, figure)
 
         removeWorkings(strip, location, type)
         checkWorkings(strip)
@@ -316,7 +316,7 @@ def completeElement(strip, element):
                             strip.workingsArray[k].remove(l)
 
 
-def checkTable(strips):  # check the strips, attempt to solve table
+def checkTable():  # check the strips, attempt to solve table
     for i in strips:
 
         checkUnitsIdentifiedInElements(strips[i])
@@ -374,14 +374,20 @@ def checkTable(strips):  # check the strips, attempt to solve table
                                 strips[i].workingsArray[k] = [strips[i].elements[j].ID]
 
 
-def solver(rows, columns, plot):
+def solver(rows, columns, showPlot1):
 
-    print(rows)
+    global showPlot, strips
+
+    showPlot = showPlot1
+
     print(columns)
 
     strips = setup(rows, columns)
 
-    firstPass(strips)
+    if showPlot == 1:
+        figure = plot.setupPlotFigure(rows, columns, strips)
+
+    firstPass()
 
     i = 1
     longstop = 10
@@ -391,7 +397,7 @@ def solver(rows, columns, plot):
 
         if tableComplete == 1: i = longstop  # use this to do one final check!
 
-        checkTable(strips)
+        checkTable()
 
         # have all strips been completed?
         tableComplete = 1
@@ -400,7 +406,12 @@ def solver(rows, columns, plot):
 
         i += 1
 
-    return 1
+    if showPlot == 1:
+        plot.showPlotFigure(figure)
+
+    return strip
+
+
 
 
 
