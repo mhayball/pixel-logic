@@ -1,8 +1,10 @@
-import plotly.plotly as py
-import plotly.graph_objs as go
-from plotly.offline import init_notebook_mode, iplot, plot
+#import plotly.plotly as py
+#import plotly.graph_objs as go
+#from plotly.offline import init_notebook_mode, iplot, plot
 
-init_notebook_mode(connected=True)
+#init_notebook_mode(connected=True)
+
+from plotly.offline import plot
 
 
 def setupPlotFigure(rows, columns, strips):  # setup plotly figures

@@ -172,7 +172,7 @@ def firstPass():  # first check of strips following setup
         """
 
 
-def printStrip(RC, number):  # print strips - handy debug function
+def printStrip(RC, number):  # print strip - handy debug function
     i = (RC, number)
     pprint(vars(strips[i]))
     for j in strips[i].elements:
@@ -270,10 +270,14 @@ def checkWorkings(strip):
         maxElement = max(strip.workingsArray[i])
 
         for j in range(0, i):  # if there are any workings elements greater than the maxElement, prior to j, remove them
-            print("test")
+            minElement = min(strip.workingsArray[i])
+            maxElement = max(strip.workingsArray[i])
+            #print("test")
 
         for j in range(i, len(strip.workingsArray)):  # if there are any workings elements less than the minElement, after j, remove them
-            print("test")
+            minElement = min(strip.workingsArray[i])
+            maxElement = max(strip.workingsArray[i])
+            #print("test")
 
 
 
@@ -380,7 +384,9 @@ def solver(rows, columns, showPlot1):
 
     showPlot = showPlot1
 
+    print("solver")
     print(columns)
+    print("showPlot - ", showPlot)
 
     strips = setup(rows, columns)
 
@@ -406,10 +412,14 @@ def solver(rows, columns, showPlot1):
 
         i += 1
 
+    print("showPlot - ", showPlot)
+
     if showPlot == 1:
         plot.showPlotFigure(figure)
 
-    return strip
+    print("showPlot - ", showPlot)
+
+    return rows
 
 
 
