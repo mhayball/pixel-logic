@@ -378,19 +378,16 @@ def checkTable():  # check the strips, attempt to solve table
                                 strips[i].workingsArray[k] = [strips[i].elements[j].ID]
 
 
-def solver(rows, columns, showPlot1):
+def solver(inputRows, inputColumns, inputShowPlot):
 
-    global showPlot, strips
-
-    showPlot = showPlot1
-
-    print("solver")
-    print(columns)
-    print("showPlot - ", showPlot)
-
+    global showPlot, strips, rows, columns
+    rows = inputRows
+    columns = inputColumns
+    showPlot = inputShowPlot
     strips = setup(rows, columns)
 
     if showPlot == 1:
+        global figure
         figure = plot.setupPlotFigure(rows, columns, strips)
 
     firstPass()
@@ -412,12 +409,8 @@ def solver(rows, columns, showPlot1):
 
         i += 1
 
-    print("showPlot - ", showPlot)
-
     if showPlot == 1:
         plot.showPlotFigure(figure)
-
-    print("showPlot - ", showPlot)
 
     return rows
 

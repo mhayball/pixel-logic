@@ -4,6 +4,7 @@
 
 #init_notebook_mode(connected=True)
 
+import pandas as pd
 from plotly.offline import plot
 
 
