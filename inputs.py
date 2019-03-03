@@ -4,8 +4,8 @@ import calculator
 # input data
 
 # done
-rows = np.array([[3],[3],[3],[1,1,1],[2,2]])
-columns = np.array([[2],[3,1],[4],[3,1],[2]])
+rows = [[3],[3],[3],[1,1,1],[2,2]]
+columns = [[2],[3,1],[4],[3,1],[2]]
 
 # done
 # rows = np.array([[1,2],[1,1,1],[1,1,1],[2,1]])

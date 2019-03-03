@@ -1,5 +1,6 @@
 import numpy as np
 import plot
+from pprint import pprint
 
 class Strip:
     def __init__(self, RC, ID, inputArray, length):
@@ -280,7 +281,6 @@ def checkWorkings(strip):
             #print("test")
 
 
-
 def checkUnitsIdentifiedInElements(strip):  # how many units of an element have been identified? Across a whole strip.
     for element in strip.elements:  # reset to zero
         strip.elements[element].unitsIdentified = 0
@@ -378,11 +378,22 @@ def checkTable():  # check the strips, attempt to solve table
                                 strips[i].workingsArray[k] = [strips[i].elements[j].ID]
 
 
+def output():
+
+    output = []
+
+    for i in strips:
+        if strips[i].RC =='R':
+            output.append(strips[i].outputArray)
+
+    return output
+
+
 def solver(inputRows, inputColumns, inputShowPlot):
 
     global showPlot, strips, rows, columns
-    rows = inputRows
-    columns = inputColumns
+    rows = np.array(inputRows)
+    columns = np.array(inputColumns)
     showPlot = inputShowPlot
     strips = setup(rows, columns)
 
@@ -412,7 +423,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
     if showPlot == 1:
         plot.showPlotFigure(figure)
 
-    return rows
+    return output()
 
 
 
