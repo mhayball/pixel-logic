@@ -14,6 +14,7 @@ class Strip:
         self.workingsArray = [np.nan] * length
         self.outputArray = [np.nan] * length
         self.complete = 0
+        self.noOfElements = 0
 
         for i in range(len(self.workingsArray)):
             self.workingsArray[i] = []
@@ -27,7 +28,7 @@ class Strip:
             self.unitsIdentified = 0
 
 
-def setup(rows, columns):  # setup initial strips
+def setupOLD(rows, columns):  # setup initial strips
     # size = [rows.size, columns.size]
     # print size
     strips = dict()
@@ -77,7 +78,7 @@ def setup(rows, columns):  # setup initial strips
     return strips
 
 
-def setup2(rows, columns):  # setup initial strips
+def setup(rows, columns):  # setup initial strips
     # size = [rows.size, columns.size]
     # print size
     strips = dict()
@@ -115,6 +116,7 @@ def setup2(rows, columns):  # setup initial strips
 
             # final element could be zero length
             strips[i].elements[x] = strips[i].Element(x, 0, 0)
+            strips[i].noOfElements = x+1
 
         # set up maximum lengths
         totalMinimumLength = 0
@@ -134,7 +136,7 @@ def setup2(rows, columns):  # setup initial strips
     return strips
 
 
-def firstPass2():  # first check of strips following setup
+def firstPass():  # first check of strips following setup
 
     # add workings
     # possibleArray shows possible positions of elements based on minimum length
@@ -144,74 +146,42 @@ def firstPass2():  # first check of strips following setup
 
         printStrip(strips[i].RC, strips[i].ID)
 
-        for j in range(0, strips[i].elements[0].maximumLength + 1): # loop through possible options
+        if strips[i].inputArray[0] == 0:  # special case if strip is 0 e.g. blank
+            strips[i].workingsArray = [np.zeros] * strips[i].length
+        else:
 
-            possibleArray = [np.nan] * strips[i].length
+            for j in range(0, strips[i].elements[0].maximumLength + 1): # loop through possible options
 
-            x = j
+                possibleArray = [np.nan] * strips[i].length
 
-            for k in range(0, len(strips[i].elements)): # loop through all elements
+                x = j
 
-                for l in range(0, strips[i].elements[k].minimumLength): # loop through length of given element
+                if x > 0: # adds first element (0) as possible options
+                    for k in range(0, x + 1):
+                        possibleArray[k] = 0
 
-                    possibleArray[x] = strips[i].elements[k].ID
-                    x = x + 1
+                for k in range(0, len(strips[i].elements)): # loop through all elements
 
-            # possibleArray is now complete, now to add to workingsArray
-            print("possibleArray", possibleArray)
-            
+                    for l in range(0, strips[i].elements[k].minimumLength): # loop through length of given element
 
+                        possibleArray[x] = strips[i].elements[k].ID
+                        x = x + 1
 
+                if x < strips[i].length: # adds last element as possible option
+                    for k in range(x, strips[i].length):
+                        possibleArray[k] = strips[i].elements[strips[i].noOfElements - 1].ID
 
+                # possibleArray is now complete, now to add to workingsArray
 
+                for k in range(0, len(possibleArray)):
 
+                    if possibleArray[k] not in strips[i].workingsArray[k] and not np.isnan(possibleArray[k]):
+                        strips[i].workingsArray[k].append(possibleArray[k])
 
-
-        for j in range(strips[i].elements[0].minimumLength - 1, strips[i].elements[0].maximumLength):
-
-            forwardArray = [np.nan] * strips[i].length
-
-            print(forwardArray)
-
-            x = j + 1
-
-            for k in range(0, len(strips[i].elements)):
-
-                for l in range(0, strips[i].elements[k].minimumLength):
-
-                    forwardArray[x] = strips[i].elements[k].ID
-                    x = x + 1
-
-                print(forwardArray)
-
-                x = 0
-                while np.isnan(forwardArray[x]):
-
-                    forwardArray[x] = 0
-                    x = x + 1
-
-                x = strips[i].length - 1
-                while np.isnan(forwardArray[x]):
-
-                    forwardArray[x] = len(strips[i].elements) - 1
-                    x = x - 1
-
-                for k in range(0, len(forwardArray)):
-
-                    if forwardArray[k] not in strips[i].workingsArray[k]:
-
-                        if np.isnan(strips[i].outputArray[k]):
-
-                            strips[i].workingsArray[k].append(forwardArray[k])
-
-                        elif strips[i].outputArray[k] == strips[i].elements[forwardArray[k]].type:
-
-                            strips[i].workingsArray[k].append(forwardArray[k])
-
-        print("workings array", strip[i].workingsArray)
+        #print("workingsArray", strips[i].workingsArray)
 
 
-def firstPass():  # first check of strips following setup
+def firstPassOLD():  # first check of strips following setup
     for i in strips:
 
         checkStrip(strips[i])
@@ -535,11 +505,15 @@ def output():
 def solver(inputRows, inputColumns, inputShowPlot):
 
     global showPlot, strips, rows, columns
+    
     rows = np.array(inputRows)
     columns = np.array(inputColumns)
     showPlot = inputShowPlot
-    strips = setup2(rows, columns)
 
+    strips = setup(rows, columns)
+
+
+    """
     for i in strips:
 
         printStrip(strips[i].RC, strips[i].ID)
@@ -548,11 +522,13 @@ def solver(inputRows, inputColumns, inputShowPlot):
         for j in strips[i].elements:
             print(strips[i].elements[j].ID, strips[i].elements[j].minimumLength, strips[i].elements[j].maximumLength)
 
+    """
+
     if showPlot == 1:
         global figure
         figure = plot.setupPlotFigure(rows, columns, strips)
 
-    firstPass2()
+    firstPass()
 
     i = 1
     longstop = 10
