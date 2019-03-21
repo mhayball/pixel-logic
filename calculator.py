@@ -260,6 +260,13 @@ def checkStrip(strip):  # check strip to see if it is complete
                 mark(strip, i, 0)
 
 
+def oddNumber(x):
+    if x % 2 > 0:
+        return 1
+    else:
+        return 0
+
+
 def removeWorkings(strip, location, type, element):  # after a cell has been marked, update and removes workings from said cell
 
     # print "checkWorkings -", strip.ID, location, strip.workingsArray, strip.workingsArray[location], type
@@ -270,34 +277,12 @@ def removeWorkings(strip, location, type, element):  # after a cell has been mar
 
     else: # if element isn't known, then remove possible elements that don't have the same type
 
-        delWorkingsArrayLocations = []  # empty array for identifying which elements are removed from the workings
+        for i in range(len(strip.workingsArray[location]), 0): # if type = 0, then only elements with an even number can be correct
+            if oddNumber(strip.workingsArray[location][i]) == 1 and type == 0:
+                del strip.workingsArray[location][i]
 
-        print("test", strip.workingsArray[location])
-
-        print(len(strip.workingsArray[location]))
-
-        for i in range(len(strip.workingsArray[location])):
-
-            element = strip.workingsArray[location][i]
-
-            # print " - element", element, strip.elements[element].type
-
-            if strip.elements[
-                element].type != type:  # if type of suggested element doesn't match what's been marked, then add to delete array
-                # print " - element type:", strip.elements[element].type, "type:", type, i, strip.workingsArray[location]
-                # print " - ", strip.workingsArray[location][i]
-                delWorkingsArrayLocations.append(i)
-
-        delWorkingsArrayLocations.sort(reverse=True)  # work in reverse order to not mess up the locations.
-
-        # print " - delWorkingsArrayLocations", delWorkingsArrayLocations
-
-        for j in range(len(delWorkingsArrayLocations)):  # delete from the workingsArray
-            delete = delWorkingsArrayLocations[j]
-            # print " - delete:", j, delete
-            del strip.workingsArray[location][delete]
-
-        # print " - checked Workings", strip.ID, location, strip.workingsArray, strip.workingsArray[location], type
+            if oddNumber(strip.workingsArray[location][i]) == 0 and type == 1:
+                del strip.workingsArray[location][i]
 
 
 def checkWorkings(strip):
