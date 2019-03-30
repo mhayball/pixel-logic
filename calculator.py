@@ -418,4 +418,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
     for i in strips:
         printStrip(strips[i].RC, strips[i].ID)
 
-    return output()
+    if tableComplete == 1:
+        return ["tableComplete", output()]
+    else:
+        return ["tableNotComplete", output()]
