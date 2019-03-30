@@ -2,7 +2,7 @@ import pandas as pd
 from plotly.offline import plot
 
 
-def setupPlotFigure(rows, columns, strips):  # setup plotly figures
+def setupPlotFigure(rows, columns, strips, showWorkings):  # setup plotly figures
 
     figure = {
         'data': [],
@@ -10,7 +10,7 @@ def setupPlotFigure(rows, columns, strips):  # setup plotly figures
         'frames': []
     }
 
-    data = createPlotFigureData(rows, columns, strips)
+    data = createPlotFigureData(rows, columns, strips, showWorkings)
     header = data[0]
     cells = data[1]
 
@@ -65,7 +65,7 @@ def setupPlotFigure(rows, columns, strips):  # setup plotly figures
     return figure
 
 
-def createPlotFigureData(rows, columns, strips):  # creates plot figure data for plotly figure
+def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot figure data for plotly figure
 
     columnLabels = []  # new column to work in df
 
@@ -92,6 +92,38 @@ def createPlotFigureData(rows, columns, strips):  # creates plot figure data for
         rowLabels.append(text)
         rowsColor.append('darkgrey')
 
+    if showWorkings == 1:
+
+        rowLabels.append("cols workings")
+        rowsColor.append('white')
+
+        for i in range(len(rows)):
+            text = "(" + str(i) + ") - "
+
+            for j in range(len(rows[i])):
+                text += str(rows[i][j])
+
+                if j != (len(rows[i]) - 1):
+                    text += ", "
+
+            rowLabels.append(text)
+            rowsColor.append('darkgrey')
+
+        rowLabels.append("rows workings")
+        rowsColor.append('white')
+
+        for i in range(len(rows)):
+            text = "(" + str(i) + ") - "
+
+            for j in range(len(rows[i])):
+                text += str(rows[i][j])
+
+                if j != (len(rows[i]) - 1):
+                    text += ", "
+
+            rowLabels.append(text)
+            rowsColor.append('darkgrey')
+
     grid = []
     colorsGrid = []
 
@@ -111,6 +143,50 @@ def createPlotFigureData(rows, columns, strips):  # creates plot figure data for
                     rowColors.append('white')
 
             colorsGrid.append(rowColors)
+
+    if showWorkings == 1:
+
+        grid.append('blank')
+        colorsGrid.append('white')
+
+        for i in sorted(strips):  # sort strips to display in right order
+            if strips[i].RC == 'R':  # only need to show rows (as columns will match)
+                grid.append(strips[i].outputArray)
+
+                rowColors = []
+
+                for j in strips[i].outputArray:
+
+                    if j == 1:
+                        rowColors.append('green')
+                    elif j == 0:
+                        rowColors.append('lightgrey')
+                    else:
+                        rowColors.append('white')
+
+                colorsGrid.append(rowColors)
+
+        grid.append('blank')
+        colorsGrid.append('white')
+
+        for i in sorted(strips):  # sort strips to display in right order
+            if strips[i].RC == 'R':  # only need to show rows (as columns will match)
+                grid.append(strips[i].outputArray)
+
+                rowColors = []
+
+                for j in strips[i].outputArray:
+
+                    if j == 1:
+                        rowColors.append('green')
+                    elif j == 0:
+                        rowColors.append('lightgrey')
+                    else:
+                        rowColors.append('white')
+
+                colorsGrid.append(rowColors)
+
+    print("")
 
     df = pd.DataFrame(data=grid, index=rowLabels, columns=columnLabels)
     dfColors = pd.DataFrame(data=colorsGrid, index=rowsColor, columns=columnLabels)

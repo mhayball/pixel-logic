@@ -383,7 +383,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
     if showPlot == 1:
         global figure
-        figure = plot.setupPlotFigure(rows, columns, strips)
+        figure = plot.setupPlotFigure(rows, columns, strips, 1)
 
     firstPass()
 
