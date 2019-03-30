@@ -67,6 +67,8 @@ def setupPlotFigure(rows, columns, strips, showWorkings):  # setup plotly figure
 
 def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot figure data for plotly figure
 
+    # set up columns
+
     columnLabels = []  # new column to work in df
 
     for i in range(len(columns)):
@@ -76,6 +78,8 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
             text += "<br> " + str(columns[i][j])
 
         columnLabels.append(text)
+
+    # set up rows
 
     rowLabels = []
     rowsColor = []
@@ -92,8 +96,10 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
         rowLabels.append(text)
         rowsColor.append('darkgrey')
 
-    if showWorkings == 1:
+    if showWorkings:
 
+        rowLabels.append("")
+        rowsColor.append('white')
         rowLabels.append("cols workings")
         rowsColor.append('white')
 
@@ -121,8 +127,20 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
                 if j != (len(rows[i]) - 1):
                     text += ", "
 
+            text += " - Elements: "
+
+            first = True
+            for j in strips['R',i].elements:
+                if first:
+                    first = False
+                else:
+                    text += ", "
+                text += str(strips['R',i].elements[j].ID)
+
             rowLabels.append(text)
             rowsColor.append('darkgrey')
+
+    # set up grid
 
     grid = []
     colorsGrid = []
@@ -144,14 +162,31 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
             colorsGrid.append(rowColors)
 
-    if showWorkings == 1:
+    if showWorkings:
 
-        grid.append('blank')
-        colorsGrid.append('white')
+        grid.append(['','','','',''])
+        colorsGrid.append(['white','white','white','white','white'])
+        newColumnLabels = []
+
+        for i in range(len(columnLabels)):
+            text = columnLabels[i]
+            text += "<br>-<br>Elements:"
+
+            for j in strips['C',i].elements:
+                text += "<br>" + str(strips['C',i].elements[j].ID)
+
+            newColumnLabels.append(text)
+
+        grid.append(newColumnLabels)
+        colorsGrid.append(['white', 'white', 'white', 'white', 'white'])
 
         for i in sorted(strips):  # sort strips to display in right order
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
-                grid.append(strips[i].outputArray)
+                newRow = []
+                for j in range(len(columnLabels)):
+                    newRow.append(strips['C',j].workingsArray[strips[i].ID])
+
+                grid.append(newRow)
 
                 rowColors = []
 
@@ -166,12 +201,12 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
                 colorsGrid.append(rowColors)
 
-        grid.append('blank')
-        colorsGrid.append('white')
+        grid.append(['', '', '', '', ''])
+        colorsGrid.append(['white', 'white', 'white', 'white', 'white'])
 
         for i in sorted(strips):  # sort strips to display in right order
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
-                grid.append(strips[i].outputArray)
+                grid.append(strips[i].workingsArray)
 
                 rowColors = []
 
@@ -198,11 +233,11 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
     return data
 
 
-def addFrameToPlotFigure(rows, columns, strips, figure):  # adds frames to plotly figure
+def addFrameToPlotFigure(rows, columns, strips, figure, showWorkings):  # adds frames to plotly figure
 
     i = len(figure['frames']) + 1
 
-    data = createPlotFigureData(rows, columns, strips)
+    data = createPlotFigureData(rows, columns, strips, showWorkings)
     header = data[0]
     cells = data[1]
 

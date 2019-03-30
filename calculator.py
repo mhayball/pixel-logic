@@ -220,7 +220,7 @@ def mark(strip, location, type, element = np.nan):  # marks a unit in a strip at
         strip.outputArray[location] = type  # mark the unit
 
         if strip.RC == 'R' and showPlot == 1:
-            plot.addFrameToPlotFigure(rows, columns, strips, figure)
+            plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
         removeWorkings(strip, location, type, element)
         checkWorkings(strip)
@@ -361,11 +361,12 @@ def output():
 
 def solver(inputRows, inputColumns, inputShowPlot):
 
-    global showPlot, strips, rows, columns
+    global showPlot, showWorkings, strips, rows, columns
 
     rows = np.array(inputRows)
     columns = np.array(inputColumns)
     showPlot = inputShowPlot
+    showWorkings = True
 
     strips = setup(rows, columns)
 
@@ -383,7 +384,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
     if showPlot == 1:
         global figure
-        figure = plot.setupPlotFigure(rows, columns, strips, 1)
+        figure = plot.setupPlotFigure(rows, columns, strips, showWorkings)
 
     firstPass()
 
