@@ -164,8 +164,14 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
     if showWorkings:
 
-        grid.append(['','','','',''])
-        colorsGrid.append(['white','white','white','white','white'])
+        newBlankRow = []
+        newWhiteRow = []
+        for i in range(len(rows)):
+            newBlankRow.append('')
+            newWhiteRow.append('white')
+
+        grid.append(newBlankRow)
+        colorsGrid.append(newWhiteRow)
         newColumnLabels = []
 
         for i in range(len(columnLabels)):
@@ -178,7 +184,7 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
             newColumnLabels.append(text)
 
         grid.append(newColumnLabels)
-        colorsGrid.append(['white', 'white', 'white', 'white', 'white'])
+        colorsGrid.append(newWhiteRow)
 
         for i in sorted(strips):  # sort strips to display in right order
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
@@ -201,8 +207,8 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
                 colorsGrid.append(rowColors)
 
-        grid.append(['', '', '', '', ''])
-        colorsGrid.append(['white', 'white', 'white', 'white', 'white'])
+        grid.append(newBlankRow)
+        colorsGrid.append(newWhiteRow)
 
         for i in sorted(strips):  # sort strips to display in right order
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
