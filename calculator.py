@@ -217,6 +217,7 @@ def mark(strip, location, type, element = np.nan):  # marks a unit in a strip at
         pass
     else:  # mark the unit
         # print "marked - location:", location, "type:", type
+
         strip.outputArray[location] = type  # mark the unit
 
         if strip.RC == 'R' and showPlot == 1:
@@ -260,29 +261,35 @@ def checkStrip(strip):  # check strip to see if it is complete
                 mark(strip, i, 0)
 
 
-def oddNumber(x):
+def isItOdd(x):
     if x % 2 > 0:
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 
 def removeWorkings(strip, location, type, element):  # after a cell has been marked, update and removes workings from said cell
 
-    # print "checkWorkings -", strip.ID, location, strip.workingsArray, strip.workingsArray[location], type
+    #print("removeWorkings -", strip.ID, location, strip.workingsArray, strip.workingsArray[location], type, element)
 
     if not np.isnan(element): # if element is known, then simply replace workingsArray with the given element
 
         strip.workingsArray[location] = [element]
+        #print("workings reset")
 
     else: # if element isn't known, then remove possible elements that don't have the same type
 
-        for i in range(len(strip.workingsArray[location]), 0): # if type = 0, then only elements with an even number can be correct
-            if oddNumber(strip.workingsArray[location][i]) == 1 and type == 0:
-                del strip.workingsArray[location][i]
+        #print("workings to be deleted")
+        #print(len(strip.workingsArray[location]))
 
-            if oddNumber(strip.workingsArray[location][i]) == 0 and type == 1:
+        for i in range(len(strip.workingsArray[location]) -1, -1, -1): # if type = 0, then only elements with an even number can be correct
+            #print("workings to be deleted", i)
+            if isItOdd(strip.workingsArray[location][i]) and type == 0:
                 del strip.workingsArray[location][i]
+                #print("workings deleted")
+            elif not isItOdd(strip.workingsArray[location][i]) and type == 1:
+                del strip.workingsArray[location][i]
+                #print("workings deleted")
 
 
 def checkWorkings(strip):
@@ -390,8 +397,10 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
     print("--------start of first pass---------")
 
+    """
     for i in strips:
         printStrip(strips[i].RC, strips[i].ID)
+    """
 
     print("--------end of first pass---------")
 
@@ -416,8 +425,10 @@ def solver(inputRows, inputColumns, inputShowPlot):
     if showPlot == 1:
         plot.showPlotFigure(figure)
 
+    """
     for i in strips:
         printStrip(strips[i].RC, strips[i].ID)
+    """
 
     if tableComplete == 1:
         return ["tableComplete", output()]
