@@ -34,14 +34,14 @@ def setup(rows, columns):  # setup initial strips
     strips = dict()
 
     # rows
-    for i in range(rows.size):
+    for i in range(len(rows)):
         dictID = "R", i
-        strips[dictID] = Strip("R", i, rows[i], columns.size)
+        strips[dictID] = Strip("R", i, rows[i], len(columns))
 
     # cols
-    for i in range(columns.size):
+    for i in range(len(columns)):
         dictID = "C", i
-        strips[dictID] = Strip("C", i, columns[i], rows.size)
+        strips[dictID] = Strip("C", i, columns[i], len(rows))
 
     # set up elements
     for i in strips:
@@ -97,6 +97,7 @@ def firstPass():  # first check of strips following setup
         #printStrip(strips[i].RC, strips[i].ID)
 
         if strips[i].inputArray[0] == 0:  # special case if strip is 0 e.g. blank
+            print(strips[i].length)
             strips[i].workingsArray = [[0]] * strips[i].length
         else:
 
@@ -128,7 +129,7 @@ def firstPass():  # first check of strips following setup
                     if possibleArray[k] not in strips[i].workingsArray[k] and not np.isnan(possibleArray[k]):
                         strips[i].workingsArray[k].append(possibleArray[k])
 
-        #print("workingsArray", strips[i].workingsArray)
+        print("workingsArray", strips[i].workingsArray)
 
 
 def checkTable():  # check the strips, attempt to solve table
@@ -392,6 +393,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
     if showPlot == 1:
         global figure
         figure = plot.setupPlotFigure(rows, columns, strips, showWorkings)
+        plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
     firstPass()
 
@@ -423,6 +425,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
 
     if showPlot == 1:
+        plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
         plot.showPlotFigure(figure)
 
     """
