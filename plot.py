@@ -254,9 +254,52 @@ def addFrameToPlotFigure(rows, columns, strips, figure, showWorkings):  # adds f
 
 def showPlotFigure(figure):  # finalise (e.g. create sliders for animation) and show plotly figure
 
-    """
+
 
     sliders_dict = {
+        'visible': True,
+        # 'active': 1,
+        'yanchor': 'top',
+        'xanchor': 'left',
+        'currentvalue': {
+            'font': {'size': 20},
+            'prefix': 'Step:',
+            'visible': True,
+            'xanchor': 'right'
+        },
+        'transition': {'duration': 20, 'easing': 'cubic-in-out'},
+        'pad': {'b': 10, 't': 50},
+        'len': 0.9,
+        'x': 0.1,
+        'y': 0,
+        'steps': []
+    }
+
+
+    for i in range(len(figure['frames'])):
+        slider_step = {'args': [
+            [i],
+            {'frame': {'duration': 20, 'redraw': False},
+             'mode': 'immediate',
+             'transition': {'duration': 20}}
+        ],
+            'label': i,
+            'method': 'animate'}
+        sliders_dict['steps'].append(slider_step)
+
+
+
+    figure['layout']['sliders'] = [sliders_dict]
+
+    # print(figure['layout']['sliders'])
+
+    plot(figure)
+
+
+
+"""
+
+sliders_dict = {
         'args': [
             'transition', {
                 'duration': 20,
@@ -298,8 +341,4 @@ def showPlotFigure(figure):  # finalise (e.g. create sliders for animation) and 
 
 
 
-    figure['layout']['sliders'] = [sliders_dict]
-    """
-    # print(figure['layout']['sliders'])
-
-    plot(figure)
+"""
