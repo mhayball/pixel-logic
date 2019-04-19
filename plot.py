@@ -248,8 +248,6 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
                 colorsGrid.append(rowColors)
 
-    print(grid)
-    print(colorsGrid)
 
     df = pd.DataFrame(data=grid, index=rowLabels, columns=columnLabels)
     dfColors = pd.DataFrame(data=colorsGrid, index=rowsColor, columns=columnLabels)
