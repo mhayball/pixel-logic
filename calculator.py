@@ -388,13 +388,13 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
     """
 
-    if showPlot == 1:
+    if showPlot == 1: # frame 0 shows set up
         global figure
         figure = plot.setupPlotFigure(rows, columns, strips, showWorkings)
 
     firstPass()
 
-    if showPlot == 1 and showWorkings == 1: # frame 1 shows workings
+    if showPlot == 1 and showWorkings == 1: # frame 1 will then shows workings
         plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
     print("--------start of first pass---------")
@@ -424,7 +424,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
         i += 1
 
 
-    if showPlot == 1:
+    if showPlot == 1: # final frame for completeness
         plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
         plot.showPlotFigure(figure)
 
