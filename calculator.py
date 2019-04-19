@@ -391,9 +391,11 @@ def solver(inputRows, inputColumns, inputShowPlot):
     if showPlot == 1:
         global figure
         figure = plot.setupPlotFigure(rows, columns, strips, showWorkings)
-        plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
     firstPass()
+
+    if showPlot == 1 and showWorkings == 1: # frame 1 shows workings
+        plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
     print("--------start of first pass---------")
 
