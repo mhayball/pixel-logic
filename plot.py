@@ -309,7 +309,7 @@ def showPlotFigure(figure):  # finalise (e.g. create sliders for animation) and 
 
     figure['layout']['sliders'] = [sliders_dict]
 
-    print(figure)
+    #print(figure)
 
     plot(figure)
 
