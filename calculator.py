@@ -219,13 +219,14 @@ def mark(strip, location, type, element = np.nan):  # marks a unit in a strip at
 
         strip.outputArray[location] = type  # mark the unit
 
+        removeWorkings(strip, location, type, element)
+        checkWorkings(strip)
+        checkUnitsIdentifiedInElements(strip)
+
         if strip.RC == 'R' and showPlot == 1:
             plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
-        removeWorkings(strip, location, type, element)
-        checkWorkings(strip)
         markCorrespondingStrip(strip, location, type)
-        checkUnitsIdentifiedInElements(strip)
         checkStrip(strip)
 
 
