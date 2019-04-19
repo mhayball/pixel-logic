@@ -167,7 +167,7 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
         newBlankRow = []
         newWhiteRow = []
-        for i in range(len(rows)):
+        for i in range(len(columns)):
             newBlankRow.append('')
             newWhiteRow.append('white')
 
@@ -247,6 +247,9 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
                         rowColors.append('white')
 
                 colorsGrid.append(rowColors)
+
+    print(grid)
+    print(colorsGrid)
 
     df = pd.DataFrame(data=grid, index=rowLabels, columns=columnLabels)
     dfColors = pd.DataFrame(data=colorsGrid, index=rowsColor, columns=columnLabels)
