@@ -147,6 +147,7 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
     for i in sorted(strips):  # sort strips to display in right order
         if strips[i].RC == 'R':  # only need to show rows (as columns will match)
+
             grid.append(strips[i].outputArray)
 
             rowColors = []
@@ -192,7 +193,17 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
                 for j in range(len(columnLabels)):
                     newRow.append(strips['C',j].workingsArray[strips[i].ID])
 
-                grid.append(newRow)
+                newerRow = []
+                for k in range(len(newRow)):
+                    text = ""
+                    first = 1
+                    for l in range(len(newRow[k])):
+                        if first == 0: text += ", "
+                        text += str(newRow[k][l])
+                        first = 0
+                    newerRow.append(text)
+
+                grid.append(newerRow)
 
                 rowColors = []
 
@@ -212,7 +223,17 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
         for i in sorted(strips):  # sort strips to display in right order
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
-                grid.append(strips[i].workingsArray)
+                newRow = []
+                for k in range(len(strips[i].workingsArray)):
+                    text = ""
+                    first = 1
+                    for l in range(len(strips[i].workingsArray[k])):
+                        if first == 0: text += ", "
+                        text += str(strips[i].workingsArray[k][l])
+                        first = 0
+                    newRow.append(text)
+
+                grid.append(newRow)
 
                 rowColors = []
 
@@ -226,8 +247,6 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
                         rowColors.append('white')
 
                 colorsGrid.append(rowColors)
-
-    print("")
 
     df = pd.DataFrame(data=grid, index=rowLabels, columns=columnLabels)
     dfColors = pd.DataFrame(data=colorsGrid, index=rowsColor, columns=columnLabels)
@@ -253,8 +272,6 @@ def addFrameToPlotFigure(rows, columns, strips, figure, showWorkings):  # adds f
 
 
 def showPlotFigure(figure):  # finalise (e.g. create sliders for animation) and show plotly figure
-
-
 
     sliders_dict = {
         'visible': True,

@@ -97,7 +97,7 @@ def firstPass():  # first check of strips following setup
         #printStrip(strips[i].RC, strips[i].ID)
 
         if strips[i].inputArray[0] == 0:  # special case if strip is 0 e.g. blank
-            print(strips[i].length)
+
             strips[i].workingsArray = [[0]] * strips[i].length
         else:
 
@@ -128,8 +128,6 @@ def firstPass():  # first check of strips following setup
 
                     if possibleArray[k] not in strips[i].workingsArray[k] and not np.isnan(possibleArray[k]):
                         strips[i].workingsArray[k].append(possibleArray[k])
-
-        print("workingsArray", strips[i].workingsArray)
 
 
 def checkTable():  # check the strips, attempt to solve table
@@ -353,7 +351,6 @@ def completeElement(strip, element):
                     for l in strip.workingsArray[k]:
                         if strip.elements[l].type == element.type and l != element.ID:
                             strip.workingsArray[k].remove(l)
-
 
 
 def output():
