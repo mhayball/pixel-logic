@@ -140,7 +140,23 @@ def checkTable():  # check the strips, attempt to solve table
                     element = strips[i].workingsArray[j][0]
                     mark(strips[i], j, strips[i].elements[element].type, element)
 
+                else: # are all options in the workings array of the same type (e.g. odd or even)
 
+                    odd = True
+                    even = True
+
+                    for k in range(len(strips[i].workingsArray[j])):
+                        if isItOdd(strips[i].workingsArray[j][k]):
+                            odd *= True
+                            even *= False
+                        else:
+                            odd *= False
+                            even *= True
+
+                    if odd:
+                        mark(strips[i], j, 1)
+                    if even:
+                        mark(strips[i], j, 0)
 
 
 def printStrip(RC, number):  # print strip - handy debug function
