@@ -253,8 +253,50 @@ def checkWorkings(strip):
     checkWorkingsHigherLowerElements(strip)
     checkWorkingsOfSurroundingMarkedElements(strip)
     checkWorkingsOfSurroundingElementsLength(strip)
+    checkWorkingsOfSurroundingMarkedElementsLength(strip)
 
     #printStrip(strip.RC, strip.ID)
+
+
+def checkWorkingsOfSurroundingMarkedElementsLength(strip):
+    # if unit has element identified, look backward/forward for constraints (e.g. not in workingsArray) and then mark units accordingly
+
+    for i in range(len(strip.workingsArray)):
+        if len(strip.workingsArray[i]) == 1: # therefore element has been identified and marked
+            element = strip.workingsArray[i][0]
+            elementType = strip.elements[element].type
+            elementMinimumLength = strip.elements[element].minimumLength
+
+            # look backwards
+            backwardsConstraint = 0
+            for j in range(i - 1, -1, -1):
+                if element in strip.workingsArray[j]:
+                    backwardsConstraint += 1
+                else:
+                    break
+
+            # amount forward must be minimumLength - 1 - backwardsConstraint
+            amountForward = elementMinimumLength - 1 - backwardsConstraint
+
+            for j in range(amountForward+1):
+                strip.workingsArray[i+j] = [element]
+
+            # look forwards
+            forwardsConstraint = 0
+            for j in range(i+1, strip.length, +1):
+                if element in strip.workingsArray[j]:
+                    forwardsConstraint += 1
+                else:
+                    break
+
+            # amount backward must be minimumLength - 1 - forwardsConstraint
+            amountBackward = elementMinimumLength - 1 - forwardsConstraint
+
+            for j in range(amountBackward, -1, -1):
+                strip.workingsArray[i - j] = [element]
+                
+
+
 
 
 def checkWorkingsOfSurroundingElementsLength(strip):
@@ -274,7 +316,6 @@ def checkWorkingsOfSurroundingElementsLength(strip):
                 elementMaximumLength = strip.elements[element].maximumLength
 
                 if length > elementMaximumLength:
-                    print(length, strip.workingsArray[i], element, elementMaximumLength, j)
                     del strip.workingsArray[i][j]
 
 
