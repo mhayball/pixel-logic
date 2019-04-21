@@ -254,7 +254,8 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
 
     data = [dict(values=['-'] + list(df.columns), fill=dict(color='darkgrey'), align='left'),
             dict(values=[v for v in df.reset_index().values.T],
-                 fill=dict(color=[v for v in dfColors.reset_index().values.T]), align='left', height=25)]
+                 fill=dict(color=[v for v in dfColors.reset_index().values.T]), align='left', height=25,
+                 line=dict(width=1))]
 
     return data
 
@@ -276,7 +277,6 @@ def showPlotFigure(figure):  # finalise (e.g. create sliders for animation) and 
 
     sliders_dict = {
         'visible': True,
-        # 'active': 1,
         'yanchor': 'top',
         'xanchor': 'left',
         'currentvalue': {

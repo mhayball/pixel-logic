@@ -2,7 +2,6 @@ import numpy as np
 import plot
 from pprint import pprint
 
-
 class Strip:
     def __init__(self, RC, ID, inputArray, length):
         self.RC = RC
@@ -142,62 +141,6 @@ def checkTable():  # check the strips, attempt to solve table
                     mark(strips[i], j, strips[i].elements[element].type, element)
 
 
-def checkTableOLD():  # check the strips, attempt to solve table
-    for i in strips:
-
-        if strips[i].complete == 0:  # ignore strips that are complete
-
-            # print("--- Strip ---")
-            # print "i", i
-            # pprint(vars(strips[i]))
-
-            for j in range(len(strips[i].workingsArray)):  # check workings array
-
-                if len(strips[i].workingsArray[j]) == 1:  # if only 1 option, then mark!
-                    element = strips[i].workingsArray[j][0]
-                    mark(strips[i], j, strips[i].elements[element].type)
-
-                    # look forward and backward and remove impossibilities from workings given maximum length
-                    beforeLocation = max(0, (j - strips[i].elements[element].maximumLength))
-                    afterLocation = min(strips[i].length, (j + strips[i].elements[element].maximumLength))
-
-                    for k in range(0, beforeLocation):
-                        if element in strips[i].workingsArray[k]: strips[i].workingsArray[k].remove(element)
-
-                    for k in range(afterLocation, strips[i].length):
-                        if element in strips[i].workingsArray[k]: strips[i].workingsArray[k].remove(element)
-
-                    # remove elements that are higher/lower as appropriate
-
-                    for k in range(0, j):
-                        for l in strips[i].workingsArray[k]:
-                            if l > element: strips[i].workingsArray[k].remove(l)
-
-                    for k in range(j, strips[i].length):
-                        for l in strips[i].workingsArray[k]:
-                            if l < element: strips[i].workingsArray[k].remove(l)
-
-            for j in strips[i].elements:
-
-                if strips[i].elements[j].minimumLength > 0:  # only look at elements that have minimumLength > 0
-
-                    # count how many possible cells
-                    counter = 0
-                    for k in strips[i].workingsArray:
-                        if strips[i].elements[j].ID in k:
-                            counter += 1
-
-                    # pprint(vars(strips[i].elements[j]))
-                    # print counter
-
-                    if strips[i].elements[
-                        j].minimumLength == counter:  # if counter = minimum, then all must be marked and workings updated
-                        for k in range(len(strips[i].workingsArray)):
-                            if strips[i].elements[j].ID in strips[i].workingsArray[k]:
-                                mark(strips[i], k, strips[i].elements[j].type)
-                                strips[i].workingsArray[k] = [strips[i].elements[j].ID]
-
-
 def printStrip(RC, number):  # print strip - handy debug function
     i = (RC, number)
     pprint(vars(strips[i]))
@@ -227,7 +170,7 @@ def mark(strip, location, type, element = np.nan):  # marks a unit in a strip at
             plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
 
         markCorrespondingStrip(strip, location, type)
-        checkStrip(strip)
+        checkStripComplete(strip)
 
 
 def markCorrespondingStrip(strip, location, type):  # find corresponding unit in row/column strip
@@ -246,7 +189,7 @@ def markCorrespondingStrip(strip, location, type):  # find corresponding unit in
         mark(strips[correspondingDictID], strip.ID, type)
 
 
-def checkStrip(strip):  # check strip to see if it is complete
+def checkStripComplete(strip):  # check strip to see if it is complete
     # print "check"
     stripInputSum = np.nansum(strip.inputArray)
     stripOutputSum = np.nansum(strip.outputArray)
@@ -270,29 +213,22 @@ def isItOdd(x):
 
 def removeWorkings(strip, location, type, element):  # after a cell has been marked, update and removes workings from said cell
 
-    #print("removeWorkings -", strip.ID, location, strip.workingsArray, strip.workingsArray[location], type, element)
-
     if not np.isnan(element): # if element is known, then simply replace workingsArray with the given element
 
         strip.workingsArray[location] = [element]
-        #print("workings reset")
 
     else: # if element isn't known, then remove possible elements that don't have the same type
 
-        #print("workings to be deleted")
-        #print(len(strip.workingsArray[location]))
-
         for i in range(len(strip.workingsArray[location]) -1, -1, -1): # if type = 0, then only elements with an even number can be correct
-            #print("workings to be deleted", i)
             if isItOdd(strip.workingsArray[location][i]) and type == 0:
                 del strip.workingsArray[location][i]
-                #print("workings deleted")
             elif not isItOdd(strip.workingsArray[location][i]) and type == 1:
                 del strip.workingsArray[location][i]
-                #print("workings deleted")
 
 
 def checkWorkings(strip):
+
+    checkWorkingsElements(strip)
 
     #printStrip(strip.RC, strip.ID)
 
@@ -313,6 +249,20 @@ def checkWorkings(strip):
                 minElement = min(strip.workingsArray[i])
                 maxElement = max(strip.workingsArray[i])
                 #print("test")
+
+
+def checkWorkingsElements(strip):
+    # count how many times element has been identified in workingsArray
+    # if this equals the minimum length of said element, then said units must contain that element. Update workingsArray
+
+    for element in strip.elements:
+        howManyTimesIdentified = 0
+        for i in range(len(strip.workingsArray)):
+            if strip.elements[element].ID in strip.workingsArray[i]: howManyTimesIdentified += 1
+
+        if howManyTimesIdentified == strip.elements[element].minimumLength:
+            for i in range(len(strip.workingsArray)):
+                if strip.elements[element].ID in strip.workingsArray[i]: strip.workingsArray[i] = [strip.elements[element].ID]
 
 
 def checkUnitsIdentifiedInElements(strip):  # how many units of an element have been identified? Across a whole strip.
