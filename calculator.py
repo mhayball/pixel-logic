@@ -228,30 +228,73 @@ def removeWorkings(strip, location, type, element):  # after a cell has been mar
 
 def checkWorkings(strip):
 
-    checkWorkingsElements(strip)
+    #printStrip(strip.RC, strip.ID)
+
+    checkWorkingsElementsCount(strip)
+    checkWorkingsElementsPositions(strip)
+    checkWorkingsHigherLowerElements(strip)
 
     #printStrip(strip.RC, strip.ID)
 
+
+def checkWorkingsElementsPositions(strip):
+    # if unit has element identified, take max length and look forward/backward to ensure element isn't in workingsArray
+
     for i in range(len(strip.workingsArray)):
-        if strip.complete != 1:
+        if len(strip.workingsArray[i]) == 1: # therefore element has been identified
+            element = strip.workingsArray[i][0]
+            maximumLength = strip.elements[element].maximumLength
 
-            #print(strip.workingsArray[i])
-
-            minElement = min(strip.workingsArray[i])
-            maxElement = max(strip.workingsArray[i])
-
-            for j in range(0, i):  # if there are any workings elements greater than the maxElement, prior to j, remove them
-                minElement = min(strip.workingsArray[i])
-                maxElement = max(strip.workingsArray[i])
-                #print("test")
-
-            for j in range(i, len(strip.workingsArray)):  # if there are any workings elements less than the minElement, after j, remove them
-                minElement = min(strip.workingsArray[i])
-                maxElement = max(strip.workingsArray[i])
-                #print("test")
+            for j in range(len(strip.workingsArray)):
+                distanceFromi = abs(j-i)
+                if distanceFromi >= maximumLength: # workings must be removed
+                    for k in range(len(strip.workingsArray[j]) -1 , -1, -1):
+                        if strip.workingsArray[j][k] == element: del strip.workingsArray[j][k]
 
 
-def checkWorkingsElements(strip):
+def checkWorkingsHigherLowerElements(strip):
+    # check that previous units don't have workings that are higher than the higher in this unit
+    # equally, check that later units don't have workings that are lower than the lowest in this unit
+
+    for i in range(len(strip.workingsArray)):
+        minElement = min(strip.workingsArray[i])
+        maxElement = max(strip.workingsArray[i])
+
+        for j in range(0, i):
+            #maxWorkingsElement = max(strip.workingsArray[j])
+
+            #print("len", len(strip.workingsArray[j]))
+
+            for k in range(len(strip.workingsArray[j])-1, -1, -1):
+
+                #print("k", k)
+
+                #print(strip.workingsArray[j][k], maxElement)
+
+                if strip.workingsArray[j][k] > maxElement:
+                    #print("workingsElement > maxElement", strip.ID, strip.RC, i, strip.workingsArray[j], strip.workingsArray[j][k], maxElement)
+                    del strip.workingsArray[j][k]
+                    #print("maxWorkingsElement > maxElement", strip.ID, strip.RC, i, strip.workingsArray[j], "-", maxElement)
+
+
+        for j in range(i, strip.length):
+            #minWorkingsElement = min(strip.workingsArray[j])
+
+            # print("len", len(strip.workingsArray[j]))
+
+            for k in range(len(strip.workingsArray[j]) - 1, -1, -1):
+
+                # print("k", k)
+
+                # print(strip.workingsArray[j][k], maxElement)
+
+                if strip.workingsArray[j][k] < minElement:
+                    # print("workingsElement < minElement", strip.ID, strip.RC, i, strip.workingsArray[j], strip.workingsArray[j][k], minElement)
+                    del strip.workingsArray[j][k]
+                    # print("minWorkingsElement < minElement", strip.ID, strip.RC, i, strip.workingsArray[j], "-", minElement)
+
+
+def checkWorkingsElementsCount(strip):
     # count how many times element has been identified in workingsArray
     # if this equals the minimum length of said element, then said units must contain that element. Update workingsArray
 
