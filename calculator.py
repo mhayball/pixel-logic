@@ -251,12 +251,38 @@ def checkWorkings(strip):
     checkWorkingsElementsCount(strip)
     checkWorkingsElementsPositions(strip)
     checkWorkingsHigherLowerElements(strip)
-    checkWorkingsSurroundingElements(strip)
+    checkWorkingsOfSurroundingMarkedElements(strip)
+    checkWorkingsOfSurroundingElementsLength(strip)
 
     #printStrip(strip.RC, strip.ID)
 
 
-def checkWorkingsSurroundingElements(strip):
+def checkWorkingsOfSurroundingElementsLength(strip):
+    # if unit is marked, check following units, if marked, calculate length, and compare to workingsArray
+
+    for i in range(len(strip.workingsArray)):
+        if strip.outputArray[i] == 1:  # therefore unit has been marked
+            length = 1
+            for j in range(i+1, len(strip.outputArray)):
+                if strip.outputArray[j] == 1:
+                    length += 1
+                else:
+                    break
+
+            for j in range(len(strip.workingsArray[i])-1, -1 , -1):
+                element = strip.workingsArray[i][j]
+                elementMaximumLength = strip.elements[element].maximumLength
+
+                if length > elementMaximumLength:
+                    print(length, strip.workingsArray[i], element, elementMaximumLength, j)
+                    del strip.workingsArray[i][j]
+
+
+
+
+
+
+def checkWorkingsOfSurroundingMarkedElements(strip):
     # if unit has element identified, check surrounding units, if marked they must be part of same element
 
     for i in range(len(strip.workingsArray)):
