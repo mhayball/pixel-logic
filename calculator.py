@@ -141,6 +141,8 @@ def checkTable():  # check the strips, attempt to solve table
                     mark(strips[i], j, strips[i].elements[element].type, element)
 
 
+
+
 def printStrip(RC, number):  # print strip - handy debug function
     i = (RC, number)
     pprint(vars(strips[i]))
@@ -233,8 +235,31 @@ def checkWorkings(strip):
     checkWorkingsElementsCount(strip)
     checkWorkingsElementsPositions(strip)
     checkWorkingsHigherLowerElements(strip)
+    checkWorkingsSurroundingElements(strip)
 
     #printStrip(strip.RC, strip.ID)
+
+
+def checkWorkingsSurroundingElements(strip):
+    # if unit has element identified, check surrounding units, if marked they must be part of same element
+
+    for i in range(len(strip.workingsArray)):
+        if len(strip.workingsArray[i]) == 1: # therefore element has been identified and marked
+            element = strip.workingsArray[i][0]
+            elementType = strip.elements[element].type
+
+            #print(elementType)
+
+            if i != 0: # check unit before
+                if strip.outputArray[i-1] == elementType:
+                    strip.workingsArray[i-1] = [element]
+
+            if i != strip.length - 1: # check unit after
+                if strip.outputArray[i+1] == elementType:
+                    strip.workingsArray[i+1] = [element]
+
+
+
 
 
 def checkWorkingsElementsPositions(strip):
