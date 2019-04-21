@@ -254,8 +254,58 @@ def checkWorkings(strip):
     checkWorkingsOfSurroundingMarkedElements(strip)
     checkWorkingsOfSurroundingElementsLength(strip)
     checkWorkingsOfSurroundingMarkedElementsLength(strip)
+    checkWorkingsOfSurroundingElements(strip)
+    checkWorkingsOfRemainingSpace(strip)
+
 
     #printStrip(strip.RC, strip.ID)
+
+
+def checkWorkingsOfRemainingSpace(strip):
+    # check workings for given element. check they are continuous. compare length to minimumlength. mark middle cross over bits
+
+    for element in strip.elements:
+        if strip.elements[element].complete == 0:
+            totalCounter = 0
+
+            for i in range(len(strip.workingsArray)):
+                if strip.elements[element].ID in strip.workingsArray[i]: totalCounter += 1
+
+            continuousCounter = 0
+
+            for i in range(len(strip.workingsArray)):
+                if strip.elements[element].ID in strip.workingsArray[i]: continuousCounter += 1
+                if strip.elements[element].ID not in strip.workingsArray[i] and continuousCounter > 0:
+                    break
+
+            if totalCounter == continuousCounter:
+                buffer = totalCounter - strip.elements[element].minimumLength
+
+                for i in range(len(strip.workingsArray)):
+                    if strip.elements[element].ID in strip.workingsArray[i]:
+                        for j in range(totalCounter - buffer - buffer):
+                            strip.workingsArray[i+buffer] = [strip.elements[element].ID]
+                        break
+
+
+def checkWorkingsOfSurroundingElements(strip):
+    # if unit has element identified, look forward/backward - workings can only contain elements that are +/- 1 element
+
+    for i in range(len(strip.workingsArray)):
+        if len(strip.workingsArray[i]) == 1: # therefore element has been identified and marked
+            element = strip.workingsArray[i][0]
+
+            if i != 0: # check unit before
+                for j in range(len(strip.workingsArray[i-1])-1, -1, -1):
+                    if strip.workingsArray[i-1][j] < (element - 1):
+                        del strip.workingsArray[i-1][j]
+
+            if i != strip.length - 1: # check unit after
+                for j in range(len(strip.workingsArray[i+1]) - 1, -1, -1):
+                        if strip.workingsArray[i+1][j] > (element + 1):
+                            del strip.workingsArray[i+1][j]
+
+
 
 
 def checkWorkingsOfSurroundingMarkedElementsLength(strip):
@@ -340,6 +390,9 @@ def checkWorkingsOfSurroundingMarkedElements(strip):
             if i != strip.length - 1: # check unit after
                 if strip.outputArray[i+1] == elementType:
                     strip.workingsArray[i+1] = [element]
+
+
+
 
 
 
