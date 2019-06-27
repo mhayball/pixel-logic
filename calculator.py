@@ -244,6 +244,14 @@ def removeWorkings(strip, location, type, element):  # after a cell has been mar
                 del strip.workingsArray[location][i]
 
 
+
+
+
+
+
+
+
+
 def checkWorkings(strip):
 
     #printStrip(strip.RC, strip.ID)
@@ -256,9 +264,44 @@ def checkWorkings(strip):
     checkWorkingsOfSurroundingMarkedElementsLength(strip)
     checkWorkingsOfSurroundingElements(strip)
     checkWorkingsOfRemainingSpace(strip)
+    checkWorkingsCheckLengthsOfPossibleElements(strip)
 
 
     #printStrip(strip.RC, strip.ID)
+
+
+def checkWorkingsCheckLengthsOfPossibleElements(strip):
+    # if unit has been marked, but element not identified, check lengths of possible elements.
+    # calculate maximum length.
+    # then check for adjacent marked units and compare against maximum length.
+
+    counter = 0
+
+    for i in range(len(strip.outputArray)):
+        if not np.isnan(strip.outputArray[i]) and len(strip.workingsArray[i]) > 1:
+
+            maximumLength = 0
+
+            #print("found some: ", strip.RC, strip.ID, i, maximumLength)
+
+            for j in range(len(strip.workingsArray[i])):
+                element = strip.workingsArray[i][j]
+
+                #print(j, element, strip.elements[element].maximumLength)
+
+                if strip.elements[element].maximumLength > maximumLength:
+                    maximumLength = strip.elements[element].maximumLength
+
+            #print("found some: ", strip.RC, strip.ID, i, maximumLength)
+
+            # this needs to be finished to check adjacent units. simplyfying for maximumLength of 1 for now
+
+            if maximumLength == 1 and strip.outputArray[i] == 1:
+                if i != 0: mark(strip, i-1, 0)
+                if i < len(strip.outputArray): mark(strip, i+1, 0)
+
+
+
 
 
 def checkWorkingsOfRemainingSpace(strip):
@@ -469,6 +512,19 @@ def checkWorkingsElementsCount(strip):
                 if strip.elements[element].ID in strip.workingsArray[i]: strip.workingsArray[i] = [strip.elements[element].ID]
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 def checkUnitsIdentifiedInElements(strip):  # how many units of an element have been identified? Across a whole strip.
     for element in strip.elements:  # reset to zero
         strip.elements[element].unitsIdentified = 0
@@ -587,7 +643,10 @@ def solver(inputRows, inputColumns, inputShowPlot):
         printStrip(strips[i].RC, strips[i].ID)
     """
 
+    #printStrip('R', 14)
+
     if tableComplete == 1:
         return ["tableComplete", output()]
     else:
         return ["tableNotComplete", output()]
+
