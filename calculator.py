@@ -11,6 +11,7 @@ class Strip:
         self.elements = dict()
 
         self.workingsArray = [np.nan] * length
+        self.workingsPermutations = dict()
         self.outputArray = [np.nan] * length
         self.complete = 0
         self.noOfElements = 1
@@ -25,6 +26,11 @@ class Strip:
             self.type = type # 1 = marked, 0 = blank
             self.complete = 0
             self.unitsIdentified = 0
+
+    class WorkingsPermutations:
+        def __init__(self, ID, workingsArray):
+            self.ID = ID
+            self.workingsArray = workingsArray
 
 
 def setup(rows, columns):  # setup initial strips
