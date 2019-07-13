@@ -513,7 +513,7 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
 
     i = 1
-    longstop = 10
+    longstop = 15
     tableComplete = 0
 
     while i < longstop:
@@ -548,8 +548,9 @@ def solver(inputRows, inputColumns, inputShowPlot):
     if tableComplete == 1:
 
         checkResults()
-
+        print(i)
         return ["tableComplete", output()]
     else:
+        print(i)
         return ["tableNotComplete", output()]
 
