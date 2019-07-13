@@ -313,8 +313,7 @@ def checkStripComplete(strip):  # check strip to see if it is complete
     stripInputSum = np.nansum(strip.inputArray)
     stripOutputSum = np.nansum(strip.outputArray)
 
-    if stripInputSum == stripOutputSum:  # strip is complete
-        strip.complete = 1
+    if stripInputSum == stripOutputSum:
 
         for i in range(len(strip.outputArray)):
             # print "removing nan", strip.outputArray[i], np.nan
@@ -322,6 +321,50 @@ def checkStripComplete(strip):  # check strip to see if it is complete
                 # print "removing nan", strip.outputArray[i]
                 mark(strip, i, 0)
 
+        recalculatedInputArray = convertOutputArrayToInputArray(strip.outputArray)
+
+        #print(strip.ID, strip.inputArray, recalculatedInputArray)
+
+        if compareLists(strip.inputArray, recalculatedInputArray): # strip is complete
+            strip.complete = 1
+        else:
+            print("Error")
+            printStrip(strip.ID)
+            print("recalculatedInputArray:", recalculatedInputArray, "vs inputArray:", strip.inputArray, "outputArray:", strip.outputArray)
+            raise Exception("Strip is showing as complete but calculated outputArray does not reconcile with InputArray")
+
+
+def convertOutputArrayToInputArray(outputArray):
+    outputString = ''.join(str(i) for i in outputArray)
+
+    newOutputArray = outputString.split('0')
+
+    newInputArray = []
+    for i in newOutputArray:
+        if len(i) == 0:
+            pass
+        else:
+            newInputArray.append(len(i))
+    if len(newInputArray) == 0:
+        newInputArray.append(0)
+
+    return(newInputArray)
+
+
+def compareLists(a, b):
+
+    #print(a, len(a), b, len(b))
+
+    if len(a) == len(b):
+        for i in range(len(a)):
+            if a[i] == b[i]:
+                pass
+            else:
+                return False
+    else:
+         return False
+
+    return True
 
 def isItOdd(x):
     if x % 2 > 0:
@@ -456,6 +499,11 @@ def solver(inputRows, inputColumns, inputShowPlot):
         figure = plot.setupPlotFigure(rows, columns, strips, showWorkings)
 
     firstPass()
+
+    #printStrip("C0")
+    #printStrip("R7")
+
+    #return
 
     if showPlot == 1 and showWorkings == 1: # frame 1 will then shows workings
         plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
