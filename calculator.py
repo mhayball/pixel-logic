@@ -451,16 +451,9 @@ def output():
 
 def checkResults():
     # check that sum of inputArray == sum of outputArray
-    # note this does not check that elements have been correctly checked
 
     for i in strips:
-        if np.sum(strips[i].inputArray) == np.sum(strips[i].outputArray):
-            #print(strips[i].ID, strips[i].inputArray, np.sum(strips[i].inputArray), strips[i].outputArray, np.sum(strips[i].outputArray))
-            pass
-        else:
-            print("Error")
-            printStrip(strips[i].ID)
-            raise Exception("CheckResults error - sum of input and output array did not match")
+        checkStripComplete(strips[i])
 
 
 def solver(inputRows, inputColumns, inputShowPlot):

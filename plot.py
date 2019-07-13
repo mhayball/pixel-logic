@@ -148,7 +148,7 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
     grid = []
     colorsGrid = []
 
-    for i in sorted(strips):  # sort strips to display in right order
+    for i in strips:
         if strips[i].RC == 'R':  # only need to show rows (as columns will match)
 
             grid.append(strips[i].outputArray)
@@ -192,7 +192,7 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
         grid.append(newColumnLabels)
         colorsGrid.append(newWhiteRow)
 
-        for i in sorted(strips):  # sort strips to display in right order
+        for i in strips:
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
                 newRow = []
                 for j in range(len(columnLabels)):
@@ -227,7 +227,7 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
         grid.append(newBlankRow)
         colorsGrid.append(newWhiteRow)
 
-        for i in sorted(strips):  # sort strips to display in right order
+        for i in strips:
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
                 newRow = []
                 for k in range(len(strips[i].workingsArray)):
