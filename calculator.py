@@ -1,11 +1,13 @@
 import numpy as np
 import plot
+import itertools
 from pprint import pprint
 
 class Strip:
-    def __init__(self, RC, ID, inputArray, length):
-        self.RC = RC
+    def __init__(self, ID, RC, RCNum, inputArray, length):
         self.ID = ID
+        self.RC = RC
+        self.RCNum = RCNum
         self.inputArray = inputArray
         self.length = length
         self.elements = dict()
@@ -30,23 +32,28 @@ class Strip:
     class WorkingsPermutations:
         def __init__(self, ID, workingsArray):
             self.ID = ID
+            self.active = 1
+            self.identified = 0
             self.workingsArray = workingsArray
 
 
-def setup(rows, columns):  # setup initial strips
-    # size = [rows.size, columns.size]
-    # print size
+def setup(rows, columns):
+
+    # first test to see if solvable, e.g. sum of rows = sum of cols
+    sumCheck(rows, columns)
+
+    # setup initial strips
     strips = dict()
 
     # rows
     for i in range(len(rows)):
-        dictID = "R", i
-        strips[dictID] = Strip("R", i, rows[i], len(columns))
+        dictID = "R" + str(i)
+        strips[dictID] = Strip(dictID, "R", i, rows[i], len(columns))
 
     # cols
     for i in range(len(columns)):
-        dictID = "C", i
-        strips[dictID] = Strip("C", i, columns[i], len(rows))
+        dictID = "C" + str(i)
+        strips[dictID] = Strip(dictID, "C", i, columns[i], len(rows))
 
     # set up elements
     for i in strips:
@@ -91,11 +98,22 @@ def setup(rows, columns):  # setup initial strips
     return strips
 
 
-def firstPass():  # first check of strips following setup
+def sumCheck(rows, columns):
+    rowsSum = np.nansum(np.nansum(rows))
+    columnsSum = np.nansum(np.nansum(columns))
 
-    # add workings
-    # possibleArray shows possible positions of elements based on minimum length
-    # all permutations of possibleArray are considered and then added to workingsArray
+    if rowsSum != columnsSum:
+        raise Exception("error - rowsSum != columnsSum", rowsSum, columnsSum)
+
+    return
+
+
+def firstPass():
+    # first check of strips following setup
+    # all permutations of elements calculated (elementPermutations) and added to elementList
+    # stripPermutations then calculated based on product of elementList
+    # possibleArray is a temporary list that shows possible positions of elements based on minimum length
+    # all permutations of possibleArray are considered and then recorded
 
     for i in strips:
 
@@ -103,39 +121,89 @@ def firstPass():  # first check of strips following setup
 
         if strips[i].inputArray[0] == 0:  # special case if strip is 0 e.g. blank
 
-            strips[i].workingsArray = [[0]] * strips[i].length
-        else:
+            strips[i].workingsPermutations[0] = strips[i].WorkingsPermutations(0, [0 for i in range(strips[i].length)])
 
-            for j in range(0, strips[i].elements[0].maximumLength + 1): # loop through possible options
+        else: # calculate permutations
 
-                possibleArray = [np.nan] * strips[i].length
+            elementList = []
 
-                x = j
+            for j in strips[i].elements:
 
-                if x > 0: # adds first element (0) as possible options
-                    for k in range(0, x + 1):
-                        possibleArray[k] = 0
+                # create element permutations
+                elementPermutations = []
 
-                for k in range(0, len(strips[i].elements)): # loop through all elements
+                for k in range(strips[i].elements[j].minimumLength, (strips[i].elements[j].maximumLength + 1)):
+                    elementSubPermutations = []
+                    for l in range(k):
+                        elementSubPermutations.append(strips[i].elements[j].ID)
+                    elementPermutations.append(elementSubPermutations)
 
-                    for l in range(0, strips[i].elements[k].minimumLength): # loop through length of given element
+                strips[i].elements[j].premutations = elementPermutations
 
-                        possibleArray[x] = strips[i].elements[k].ID
-                        x = x + 1
+                # append elementPermutations into elementList for strip
+                elementList.append(elementPermutations)
 
-                if x < strips[i].length: # adds last element as possible option
-                    for k in range(x, strips[i].length):
-                        possibleArray[k] = strips[i].elements[strips[i].noOfElements - 1].ID
+            strips[i].elementList = elementList
 
-                # possibleArray is now complete, now to add to workingsArray
-
-                for k in range(0, len(possibleArray)):
-
-                    if possibleArray[k] not in strips[i].workingsArray[k] and not np.isnan(possibleArray[k]):
-                        strips[i].workingsArray[k].append(possibleArray[k])
+            # stripPermutations then calculated as produce of elementList
+            stripPermutations = itertools.product(*elementList)
+            strips[i].stripPermutations = stripPermutations
 
 
-def checkTable():  # check the strips, attempt to solve table
+            # only permutations with exact length of strip are possible
+            # flatten lists first, then check lengths
+            counter = 0
+            for j in list(stripPermutations):
+                flattened = list(itertools.chain(*j))
+                #print(j, len(j), flattened, len(flattened))
+
+                if len(flattened) == strips[i].length:
+                    # only permutations of same length can be possible and added as possible workingsArray
+                    strips[i].workingsPermutations[counter] = strips[i].WorkingsPermutations(counter, flattened)
+                    counter += 1
+
+        buildWorkingsArray(strips[i])
+
+
+def buildWorkingsArray(strip):
+    # takes current WorkingsPermutations of a strip and returns the WorkingsArray
+
+    #printStrip(strip.ID)
+
+    masterWorkingsArray = [[] for i in range(strip.length)]
+
+    for i in strip.workingsPermutations:
+
+        #print(masterWorkingsArray)
+        #print(strip.workingsPermutations[i].workingsArray)
+
+        if strip.workingsPermutations[i].active == 1: # only consider permutations that are active
+
+            for j in range(len(strip.workingsPermutations[i].workingsArray)):
+
+                possibleElement = strip.workingsPermutations[i].workingsArray[j]
+
+                #print(j, strip.workingsPermutations[i].workingsArray[j], "possibleElement - ", possibleElement)
+
+                # j = location in workingsArray
+                # if not in workingsArray, and doesn't = NaN, then add to workingsArray
+
+                if possibleElement not in masterWorkingsArray[j] and not np.isnan(possibleElement):
+                    #print("add to masterWorkingsArray", j, possibleElement, masterWorkingsArray)
+                    #print("masterWorkingsArray[j]", masterWorkingsArray[j])
+                    masterWorkingsArray[j].append(possibleElement)
+                    #print("masterWorkingsArray - ", masterWorkingsArray)
+
+    #print("masterWorkingsArray - ", masterWorkingsArray)
+
+    strip.workingsArray = masterWorkingsArray
+
+    return
+
+
+def checkTable():
+    # check the strips, attempt to solve table
+
     for i in strips:
 
         if strips[i].complete == 0:  # ignore strips that are complete
@@ -160,24 +228,51 @@ def checkTable():  # check the strips, attempt to solve table
                             even *= True
 
                     if odd:
-                        mark(strips[i], j, 1)
+                        mark(strips[i], j, 1) # mark, but we don't know which element yet
                     if even:
-                        mark(strips[i], j, 0)
+                        mark(strips[i], j, 0) # mark, but we don't know which element yet
 
 
-def printStrip(RC, number):  # print strip - handy debug function
-    i = (RC, number)
-    pprint(vars(strips[i]))
-    for j in strips[i].elements:
-        pprint(vars(strips[i].elements[j]))
+def printStrip(ID):
+    # print a strip - handy debug function
+
+    print("---", ID, "---")
+
+    """
+    print("ID:", strips[ID].ID, "RC:", strips[ID].RC, "RCNum:", strips[ID].RCNum)
+    print("inputArray:", strips[ID].inputArray)
+    print("length:", strips[ID].length)
+    print("workingsArray:", strips[ID].workingsArray)
+    print("outputArray:", strips[ID].outputArray)
+    print("complete:", strips[ID].complete)
+    """
+
+    pprint(vars(strips[ID]))
+
+    print("---", ID, "- WorkingsPermutations ---")
+    for j in strips[ID].workingsPermutations:
+        pprint(vars(strips[ID].workingsPermutations[j]))
+
+    print("---", ID, "- Elements ---")
+    for j in strips[ID].elements:
+        pprint(vars(strips[ID].elements[j]))
+
+    print("------")
 
 
-def mark(strip, location, type, element = np.nan):  # marks a unit in a strip at location, with type
+def mark(strip, location, type, element = np.nan):
+    # marks a unit in a strip at location, with type, and element if known
 
     if strip.outputArray[location] == 0 and type == 1:
-        print("error")
+        print("Error")
+        printStrip(strip.ID)
+        raise Exception("Mark error - trying to mark a unit with type 1 that is already marked as type 0")
+
     elif strip.outputArray[location] == 1 and type == 0:
-        print("error")
+        print("Error")
+        printStrip(strip.ID)
+        raise Exception("Mark error - trying to mark a unit with type 0 that is already marked as type 1")
+
     elif strip.outputArray[location] == type:  # already marked, so do nothing
         # print("already marked")
         pass
@@ -187,8 +282,8 @@ def mark(strip, location, type, element = np.nan):  # marks a unit in a strip at
         strip.outputArray[location] = type  # mark the unit
 
         removeWorkings(strip, location, type, element)
-        checkWorkings(strip)
-        checkUnitsIdentifiedInElements(strip)
+
+        checkPermutations(strip)
 
         if strip.RC == 'R' and showPlot == 1:
             plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
@@ -204,13 +299,13 @@ def markCorrespondingStrip(strip, location, type):  # find corresponding unit in
     # print strips
 
     if strip.RC == 'R':
-        correspondingDictID = 'C', location
+        correspondingDictID = "C" + str(location)
     elif strip.RC == 'C':
-        correspondingDictID = 'R', location
+        correspondingDictID = "R" + str(location)
 
     if correspondingDictID in strips:
         # print "found correspondingDictID", correspondingDictID
-        mark(strips[correspondingDictID], strip.ID, type)
+        mark(strips[correspondingDictID], strip.RCNum, type)
 
 
 def checkStripComplete(strip):  # check strip to see if it is complete
@@ -235,7 +330,8 @@ def isItOdd(x):
         return False
 
 
-def removeWorkings(strip, location, type, element):  # after a cell has been marked, update and removes workings from said cell
+def removeWorkings(strip, location, type, element):
+    # after a cell has been marked, update and removes workings from said cell
 
     if not np.isnan(element): # if element is known, then simply replace workingsArray with the given element
 
@@ -251,323 +347,52 @@ def removeWorkings(strip, location, type, element):  # after a cell has been mar
 
 
 
-
-
-
-
-
-
-
-def checkWorkings(strip):
-
-    #printStrip(strip.RC, strip.ID)
-
-    checkWorkingsElementsCount(strip)
-    checkWorkingsElementsPositions(strip)
-    checkWorkingsHigherLowerElements(strip)
-    checkWorkingsOfSurroundingMarkedElements(strip)
-    checkWorkingsOfSurroundingElementsLength(strip)
-    checkWorkingsOfSurroundingMarkedElementsLength(strip)
-    checkWorkingsOfSurroundingElements(strip)
-    checkWorkingsOfRemainingSpace(strip)
-    checkWorkingsCheckLengthsOfPossibleElements(strip)
-
-
-    #printStrip(strip.RC, strip.ID)
-
-
-def checkWorkingsCheckLengthsOfPossibleElements(strip):
-    # if unit has been marked, but element not identified, check lengths of possible elements.
-    # calculate maximum length.
-    # then check for adjacent marked units and compare against maximum length.
-
-    counter = 0
+def checkPermutations(strip):
+    # workingsArray has potentially been modified following a unit being marked
+    # as such cycle through permutations to see which no longer fit
 
     for i in range(len(strip.outputArray)):
-        if not np.isnan(strip.outputArray[i]) and len(strip.workingsArray[i]) > 1:
 
-            maximumLength = 0
-
-            #print("found some: ", strip.RC, strip.ID, i, maximumLength)
-
-            for j in range(len(strip.workingsArray[i])):
-                element = strip.workingsArray[i][j]
-
-                #print(j, element, strip.elements[element].maximumLength)
-
-                if strip.elements[element].maximumLength > maximumLength:
-                    maximumLength = strip.elements[element].maximumLength
-
-            #print("found some: ", strip.RC, strip.ID, i, maximumLength)
-
-            # this needs to be finished to check adjacent units. simplyfying for maximumLength of 1 for now
-
-            if maximumLength == 1 and strip.outputArray[i] == 1:
-                if i != 0: mark(strip, i-1, 0)
-                if i < len(strip.outputArray): mark(strip, i+1, 0)
-
-
-
-
-
-def checkWorkingsOfRemainingSpace(strip):
-    # check workings for given element. check they are continuous. compare length to minimumlength. mark middle cross over bits
-
-    for element in strip.elements:
-        if strip.elements[element].complete == 0:
-            totalCounter = 0
-
-            for i in range(len(strip.workingsArray)):
-                if strip.elements[element].ID in strip.workingsArray[i]: totalCounter += 1
-
-            continuousCounter = 0
-
-            for i in range(len(strip.workingsArray)):
-                if strip.elements[element].ID in strip.workingsArray[i]: continuousCounter += 1
-                if strip.elements[element].ID not in strip.workingsArray[i] and continuousCounter > 0:
-                    break
-
-            if totalCounter == continuousCounter:
-                buffer = totalCounter - strip.elements[element].minimumLength
-
-                for i in range(len(strip.workingsArray)):
-                    if strip.elements[element].ID in strip.workingsArray[i]:
-                        for j in range(totalCounter - buffer - buffer):
-                            strip.workingsArray[i+buffer] = [strip.elements[element].ID]
-                        break
-
-
-def checkWorkingsOfSurroundingElements(strip):
-    # if unit has element identified, look forward/backward - workings can only contain elements that are +/- 1 element
-
-    for i in range(len(strip.workingsArray)):
-        if len(strip.workingsArray[i]) == 1: # therefore element has been identified and marked
-            element = strip.workingsArray[i][0]
-
-            if i != 0: # check unit before
-                for j in range(len(strip.workingsArray[i-1])-1, -1, -1):
-                    if strip.workingsArray[i-1][j] < (element - 1):
-                        del strip.workingsArray[i-1][j]
-
-            if i != strip.length - 1: # check unit after
-                for j in range(len(strip.workingsArray[i+1]) - 1, -1, -1):
-                        if strip.workingsArray[i+1][j] > (element + 1):
-                            del strip.workingsArray[i+1][j]
-
-
-
-
-def checkWorkingsOfSurroundingMarkedElementsLength(strip):
-    # if unit has element identified, look backward/forward for constraints (e.g. not in workingsArray) and then mark units accordingly
-
-    for i in range(len(strip.workingsArray)):
-        if len(strip.workingsArray[i]) == 1: # therefore element has been identified and marked
-            element = strip.workingsArray[i][0]
-            elementType = strip.elements[element].type
-            elementMinimumLength = strip.elements[element].minimumLength
-
-            # look backwards
-            backwardsConstraint = 0
-            for j in range(i - 1, -1, -1):
-                if element in strip.workingsArray[j]:
-                    backwardsConstraint += 1
-                else:
-                    break
-
-            # amount forward must be minimumLength - 1 - backwardsConstraint
-            amountForward = elementMinimumLength - 1 - backwardsConstraint
-
-            for j in range(amountForward+1):
-                strip.workingsArray[i+j] = [element]
-
-            # look forwards
-            forwardsConstraint = 0
-            for j in range(i+1, strip.length, +1):
-                if element in strip.workingsArray[j]:
-                    forwardsConstraint += 1
-                else:
-                    break
-
-            # amount backward must be minimumLength - 1 - forwardsConstraint
-            amountBackward = elementMinimumLength - 1 - forwardsConstraint
-
-            for j in range(amountBackward, -1, -1):
-                strip.workingsArray[i - j] = [element]
-                
-
-
-
-
-def checkWorkingsOfSurroundingElementsLength(strip):
-    # if unit is marked, check following units, if marked, calculate length, and compare to workingsArray
-
-    for i in range(len(strip.workingsArray)):
-        if strip.outputArray[i] == 1:  # therefore unit has been marked
-            length = 1
-            for j in range(i+1, len(strip.outputArray)):
-                if strip.outputArray[j] == 1:
-                    length += 1
-                else:
-                    break
-
-            for j in range(len(strip.workingsArray[i])-1, -1 , -1):
-                element = strip.workingsArray[i][j]
-                elementMaximumLength = strip.elements[element].maximumLength
-
-                if length > elementMaximumLength:
-                    del strip.workingsArray[i][j]
-
-
-
-
-
-
-def checkWorkingsOfSurroundingMarkedElements(strip):
-    # if unit has element identified, check surrounding units, if marked they must be part of same element
-
-    for i in range(len(strip.workingsArray)):
-        if len(strip.workingsArray[i]) == 1: # therefore element has been identified and marked
-            element = strip.workingsArray[i][0]
-            elementType = strip.elements[element].type
-
-            #print(elementType)
-
-            if i != 0: # check unit before
-                if strip.outputArray[i-1] == elementType:
-                    strip.workingsArray[i-1] = [element]
-
-            if i != strip.length - 1: # check unit after
-                if strip.outputArray[i+1] == elementType:
-                    strip.workingsArray[i+1] = [element]
-
-
-
-
-
-
-
-
-def checkWorkingsElementsPositions(strip):
-    # if unit has element identified, take max length and look forward/backward to ensure element isn't in workingsArray
-
-    for i in range(len(strip.workingsArray)):
-        if len(strip.workingsArray[i]) == 1: # therefore element has been identified
-            element = strip.workingsArray[i][0]
-            maximumLength = strip.elements[element].maximumLength
-
-            for j in range(len(strip.workingsArray)):
-                distanceFromi = abs(j-i)
-                if distanceFromi >= maximumLength: # workings must be removed
-                    for k in range(len(strip.workingsArray[j]) -1 , -1, -1):
-                        if strip.workingsArray[j][k] == element: del strip.workingsArray[j][k]
-
-
-def checkWorkingsHigherLowerElements(strip):
-    # check that previous units don't have workings that are higher than the higher in this unit
-    # equally, check that later units don't have workings that are lower than the lowest in this unit
-
-    for i in range(len(strip.workingsArray)):
-        minElement = min(strip.workingsArray[i])
-        maxElement = max(strip.workingsArray[i])
-
-        for j in range(0, i):
-            #maxWorkingsElement = max(strip.workingsArray[j])
-
-            #print("len", len(strip.workingsArray[j]))
-
-            for k in range(len(strip.workingsArray[j])-1, -1, -1):
-
-                #print("k", k)
-
-                #print(strip.workingsArray[j][k], maxElement)
-
-                if strip.workingsArray[j][k] > maxElement:
-                    #print("workingsElement > maxElement", strip.ID, strip.RC, i, strip.workingsArray[j], strip.workingsArray[j][k], maxElement)
-                    del strip.workingsArray[j][k]
-                    #print("maxWorkingsElement > maxElement", strip.ID, strip.RC, i, strip.workingsArray[j], "-", maxElement)
-
-
-        for j in range(i, strip.length):
-            #minWorkingsElement = min(strip.workingsArray[j])
-
-            # print("len", len(strip.workingsArray[j]))
-
-            for k in range(len(strip.workingsArray[j]) - 1, -1, -1):
-
-                # print("k", k)
-
-                # print(strip.workingsArray[j][k], maxElement)
-
-                if strip.workingsArray[j][k] < minElement:
-                    # print("workingsElement < minElement", strip.ID, strip.RC, i, strip.workingsArray[j], strip.workingsArray[j][k], minElement)
-                    del strip.workingsArray[j][k]
-                    # print("minWorkingsElement < minElement", strip.ID, strip.RC, i, strip.workingsArray[j], "-", minElement)
-
-
-def checkWorkingsElementsCount(strip):
-    # count how many times element has been identified in workingsArray
-    # if this equals the minimum length of said element, then said units must contain that element. Update workingsArray
-
-    for element in strip.elements:
-        howManyTimesIdentified = 0
-        for i in range(len(strip.workingsArray)):
-            if strip.elements[element].ID in strip.workingsArray[i]: howManyTimesIdentified += 1
-
-        if howManyTimesIdentified == strip.elements[element].minimumLength:
-            for i in range(len(strip.workingsArray)):
-                if strip.elements[element].ID in strip.workingsArray[i]: strip.workingsArray[i] = [strip.elements[element].ID]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def checkUnitsIdentifiedInElements(strip):  # how many units of an element have been identified? Across a whole strip.
-    for element in strip.elements:  # reset to zero
-        strip.elements[element].unitsIdentified = 0
-
-    for i in range(len(strip.workingsArray)):
-        if len(strip.workingsArray[i]) == 1:
-            element = strip.workingsArray[i][0]
-            strip.elements[element].unitsIdentified += 1
-
-    for element in strip.elements:
-        # if unitsIdentified = max, then element is complete
-        if strip.elements[element].unitsIdentified == strip.elements[element].maximumLength:
-            completeElement(strip, strip.elements[element])
-
-            """ this currently doesn't work
-            # if element not in workingsArray, then doesn't exist and must be complete
-            if strip.elements[element].ID not in strip.workingsArray:
-                strip.elements[element].complete = 1
-            """
-
-
-def completeElement(strip, element):
-    if element.complete == 0:  # mark element as complete, and do stuff!
-        element.complete = 1
-
-        for j in range(len(strip.workingsArray)):  # remove element from OTHER workingsArray
-            if element.ID in strip.workingsArray[j] and len(strip.workingsArray[j]) > 1:
-                strip.workingsArray[j].remove(element.ID)
-
-        # check units before and after a complete element, and remove any of same type (as type must be different)
-        for j in range(len(strip.workingsArray)):
-            if element.ID in strip.workingsArray[j] and len(strip.workingsArray[j]) == 1:
-                beforeAndAfter = [max(0, j - 1), min(j + 1, strip.length - 1)]
-                for k in beforeAndAfter:
-                    for l in strip.workingsArray[k]:
-                        if strip.elements[l].type == element.type and l != element.ID:
-                            strip.workingsArray[k].remove(l)
+        if not np.isnan(strip.outputArray[i]): # e.g. it has been marked/identified
+
+            possibleElements = strip.workingsArray[i]
+            #print("### possibleElements", possibleElements, i)
+            #printStrip(strip.ID)
+
+            for j in strip.workingsPermutations:
+                if strip.workingsPermutations[j].workingsArray[i] not in possibleElements:
+                    if strip.workingsPermutations[j].identified == 1:
+                        print("Error")
+                        print(strip.workingsPermutations[j])
+                        printStrip(strip.ID)
+                        raise Exception("Error - identified permutation trying to be set inactive")
+                    strip.workingsPermutations[j].active = 0
+
+    # if only 1 permutation left active, then it must be the identified permutation
+    counter = 0
+    identifiedPermutation = 0
+
+    for i in strip.workingsPermutations:
+        if strip.workingsPermutations[i].active == 1:
+            counter += 1
+            identifiedPermutation = i
+
+    if counter == 1:
+
+        if strip.workingsPermutations[identifiedPermutation].active == 0:
+            print("Error")
+            print(identifiedPermutation)
+            printStrip(strip.ID)
+            raise Exception("Permutation error - trying to set inactive permutation as identified")
+        else:
+            strip.workingsPermutations[identifiedPermutation].identified = 1
+
+    if counter == 0:
+        print("Error")
+        printStrip(strip.ID)
+        raise Exception("Permutation error - no permutations available")
+
+    buildWorkingsArray(strip) # rebuildWorkingsArray
 
 
 def output():
@@ -593,16 +418,24 @@ def solver(inputRows, inputColumns, inputShowPlot):
     strips = setup(rows, columns)
 
 
+
+
     """
     for i in strips:
 
-        printStrip(strips[i].RC, strips[i].ID)
+        printStrip(strips[i].ID)
 
+
+        
         print(strips[i].ID, strips[i].RC, strips[i].inputArray)
+
         for j in strips[i].elements:
             print(strips[i].elements[j].ID, strips[i].elements[j].minimumLength, strips[i].elements[j].maximumLength)
-
+        
     """
+
+
+
 
     if showPlot == 1: # frame 0 shows set up
         global figure
@@ -617,10 +450,12 @@ def solver(inputRows, inputColumns, inputShowPlot):
 
     """
     for i in strips:
-        printStrip(strips[i].RC, strips[i].ID)
+        printStrip(strips[i].ID)
     """
 
     print("--------end of first pass---------")
+
+
 
     i = 1
     longstop = 10
@@ -644,12 +479,17 @@ def solver(inputRows, inputColumns, inputShowPlot):
         plot.addFrameToPlotFigure(rows, columns, strips, figure, showWorkings)
         plot.showPlotFigure(figure)
 
+    print("--------start of final results---------")
+
     """
     for i in strips:
-        printStrip(strips[i].RC, strips[i].ID)
+        printStrip(strips[i].ID)
     """
 
-    #printStrip('R', 14)
+    #for i in strips:
+        #print(strips[i].ID, strips[i].complete, strips[i].outputArray)
+
+
 
     if tableComplete == 1:
         return ["tableComplete", output()]

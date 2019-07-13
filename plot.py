@@ -130,12 +130,15 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
             text += " - Elements: "
 
             first = True
-            for j in strips['R',i].elements:
+
+            stripID = "R" + str(i)
+
+            for j in strips[stripID].elements:
                 if first:
                     first = False
                 else:
                     text += ", "
-                text += str(strips['R',i].elements[j].ID)
+                text += str(strips[stripID].elements[j].ID)
 
             rowLabels.append(text)
             rowsColor.append('darkgrey')
@@ -179,8 +182,10 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
             text = columnLabels[i]
             text += "<br>-<br>Elements:"
 
-            for j in strips['C',i].elements:
-                text += "<br>" + str(strips['C',i].elements[j].ID)
+            stripID = "C" + str(i)
+
+            for j in strips[stripID].elements:
+                text += "<br>" + str(strips[stripID].elements[j].ID)
 
             newColumnLabels.append(text)
 
@@ -191,7 +196,8 @@ def createPlotFigureData(rows, columns, strips, showWorkings):  # creates plot f
             if strips[i].RC == 'R':  # only need to show rows (as columns will match)
                 newRow = []
                 for j in range(len(columnLabels)):
-                    newRow.append(strips['C',j].workingsArray[strips[i].ID])
+                    stripID = "C" + str(j)
+                    newRow.append(strips[stripID].workingsArray[strips[i].RCNum])
 
                 newerRow = []
                 for k in range(len(newRow)):
